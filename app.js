@@ -13,7 +13,7 @@ const PORT = 5000;
 app.use(express.json())
 app.use(cors)
 
-
+mongooose.connect('mongodb+srv://kryfto:kryfto@kryfto.64xbcbh.mongodb.net/?retryWrites=true&w=majority', {useNewUrlParser: true});
 
 
 const userSchema = new Schema({
@@ -25,9 +25,7 @@ const userSchema = new Schema({
         type: String,
         required: true
     },
-}, {timestamps: true})
-
-mongooose.connect('mongodb+srv://kryfto:kryfto@kryfto.64xbcbh.mongodb.net/?retryWrites=true&w=majority', {useNewUrlParser: true});
+}, {timestamps: false})
 
 const User = mongooose.model('users', userSchema);
 module.exports = User;
@@ -57,7 +55,35 @@ io.on("connection",(socket)=>{
         io.to(msgR.receiverUsername).emit("chat message",msg)
     })
 
-    
+    socket.on("login",(msg)=>{
+        msgR = JSON.parse(msg)
+
+        User.findOne({username: msgR.Username}).then((r)=>{
+            if(r != null){
+                if(msgR.Password === r.password){
+                    Result = {
+                        'Username': r.username,
+                        'Status': 'Success',
+                    }
+                    io.emit("login",Result)
+                }else{
+                    Result = {
+                        'Username': r.username,
+                        'Status': 'Wrong password',
+                    }
+                    io.emit("login",Result)
+                }
+            }else{
+                Result = {
+                    'Username': msgR.Username,
+                    'Status': 'Username Incorrect',
+                }
+                io.emit("login",Result)
+            }
+        })
+
+        console.log(msgR)
+    })
 
     
     
