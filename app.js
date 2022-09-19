@@ -85,6 +85,28 @@ io.on("connection",(socket)=>{
         console.log(msgR)
     })
 
+    socket.on("register",(msg)=>{
+        msgR = JSON.parse(msg)
+
+        User.findOne({username: msgR.Username}).then((r)=>{
+            if(r === null){
+                const user = new User({
+                    username: msgR.Username,
+                    password: msgR.Password,
+                });
+                user.save();
+            }else{
+                Result = {
+                    'Username': msgR.Username,
+                    'Status': 'user_exists',
+                }
+                io.emit("login",Result)
+                console.log(Result)
+            }
+        })
+
+        console.log(msgR)
+    })
     
     
 })
