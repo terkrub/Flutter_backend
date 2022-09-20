@@ -4,7 +4,8 @@ const cors = require('cors')
 const scoketIO = require('socket.io')
 const mongooose = require('mongoose');
 const Schema = mongooose.Schema;
-const { isGeneratorObject } = require('util/types')
+const { isGeneratorObject } = require('util/types');
+const User = require('./Model/users');
 
 const app = express()
 const server = http.createServer(app);
@@ -15,20 +16,6 @@ app.use(cors)
 
 mongooose.connect('mongodb+srv://kryfto:kryfto@kryfto.64xbcbh.mongodb.net/?retryWrites=true&w=majority', {useNewUrlParser: true});
 
-
-const userSchema = new Schema({
-    username: {
-        type: String,
-        required: true
-    },
-    password: {
-        type: String,
-        required: true
-    },
-}, {timestamps: false})
-
-const User = mongooose.model('users', userSchema);
-module.exports = User;
 
 server.listen(PORT,()=>{
     console.log("Server run on 5000 port")
@@ -94,7 +81,7 @@ io.on("connection",(socket)=>{
                     username: msgR.Username,
                     password: msgR.Password,
                 });
-                user.save();
+                user.save()
             }else{
                 Result = {
                     'Username': msgR.Username,
