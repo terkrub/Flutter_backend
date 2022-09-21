@@ -23,13 +23,13 @@ server.listen(PORT,()=>{
 
 io.on("connection",(socket)=>{
     console.log("New user connected",socket.id)
-    scketid = socket.id
+    socketid = socket.id
     console.log(socketid)
-    socket.join(scketid)
+    socket.join(socketid)
 
     socket.on("disconnect",()=>{
         console.log("User disconnect")
-        socket.leave(scketid)
+        socket.leave(socketid)
     })
 
     socket.on("chat message",(msg)=>{
@@ -52,20 +52,20 @@ io.on("connection",(socket)=>{
                         'Username': r.username,
                         'Status': 'Success',
                     }
-                    io.to(scketid).emit("login",Result)
+                    io.to(socketid).emit("login",Result)
                 }else{
                     Result = {
                         'Username': r.username,
                         'Status': 'Wrong password',
                     }
-                    io.to(scketid).emit("login",Result)
+                    io.to(socketid).emit("login",Result)
                 }
             }else{
                 Result = {
                     'Username': msgR.Username,
                     'Status': 'Username Incorrect',
                 }
-                io.to(scketid).emit("login",Result)
+                io.to(socketid).emit("login",Result)
             }
         })
 
@@ -87,7 +87,7 @@ io.on("connection",(socket)=>{
                     'Username': msgR.Username,
                     'Status': 'user_exists',
                 }
-                io.to(scketid).emit("login",Result)
+                io.to(socketid).emit("login",Result)
                 console.log(Result)
             }
         })
