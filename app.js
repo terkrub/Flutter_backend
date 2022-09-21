@@ -192,7 +192,7 @@ io.on("connection",(socket)=>{
             if(r !== null){
                 console.log(msgR)
                 r.updateOne({Role: msgR.Role})
-                io.to(socketid).emit("change role",msgR)
+                io.to(msgR.Code).emit("change role",msg)
             }
         })
     })
