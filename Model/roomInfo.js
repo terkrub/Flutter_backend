@@ -1,18 +1,27 @@
-const mongoose = require('mongoose');
+const mongoose = require('mongoose'), Admin = mongoose.mongo.Admin;
 const Schema = mongoose.Schema;
 
+const DB = mongoose.connection.useDb('Rooms')
+
 const roomSchema = new Schema({
-    code: {
+
+    Code: {
         type: String,
         required: true
     },
-    Hider: {
-        type: String
+    MaxSeeker: {
+        type: Number,
+        required: true
     },
-    Seeker: {
-        type: String,
-    },
-}, {timestamps: true})
+    maxHider:{
+        type: Number,
+        required: true
+    }
+    
+}, {timestamps: false})
 
-const Rooms = mongoose.model('Rooms', roomSchema);
+
+const Rooms = DB.model("AllRoom", roomSchema);
+
+
 module.exports = Rooms;
