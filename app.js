@@ -24,7 +24,6 @@ server.listen(PORT,()=>{
 io.on("connection",(socket)=>{
     console.log("New user connected",socket.id)
     socketid = socket.id
-    console.log(socketid)
     socket.join(socketid)
 
     socket.on("disconnect",()=>{
