@@ -82,12 +82,18 @@ io.on("connection",(socket)=>{
                     password: msgR.Password,
                 });
                 user.save()
+                Result = {
+                    'Username': msgR.Username,
+                    'Status': 'Success',
+                }
+                io.to(socketid).emit("register",Result)
+                console.log(Result)
             }else{
                 Result = {
                     'Username': msgR.Username,
                     'Status': 'user_exists',
                 }
-                io.to(socketid).emit("login",Result)
+                io.to(socketid).emit("register",Result)
                 console.log(Result)
             }
         })
