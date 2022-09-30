@@ -116,7 +116,7 @@ io.on("connection",(socket)=>{
 
                 const player = new Players({
                     Code: room.Code,
-                    Username: "terkrub",
+                    Username: msgR.Username,
                     Role: false
                 })
 
@@ -124,13 +124,12 @@ io.on("connection",(socket)=>{
 
                 Result = {
                     'Status': 'Success',
+                    'Code': room.Code
                 }
-
+                console.log(result)
                 socket.join(room.Code)
 
-                io.to(room.Code).emit("create room",Result)
-                
-
+                io.to(room.Code).emit("create room",Result)     
             }
             else{
                 Result = {
