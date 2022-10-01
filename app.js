@@ -163,12 +163,18 @@ io.on("connection",(socket)=>{
                             'Role': msgR.Role
                         }
                         socket.join(msgR.Code)
+
                     
                         io.to(msgR.Code).emit("new join",Result)
                         console.log(Result)
 
                         const playeritems = await Players.find({Code: msgR.Code})
-                        io.to(socketid).emit("join room",playeritems)
+
+                        resultPlayer = {
+                            'Status':'Success',
+                            'Players': playeritems,
+                        }
+                        io.to(socketid).emit("join room",resultPlayer)
                     
                     }
                     else{
