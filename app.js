@@ -8,6 +8,7 @@ const { isGeneratorObject } = require('util/types');
 const User = require('./Model/users');
 const Rooms = require('./Model/roomInfo');
 const Players = require('./Model/players');
+const { default: login } = require('./Controllers/login');
 
 const app = express()
 const server = http.createServer(app);
@@ -42,35 +43,7 @@ io.on("connection",(socket)=>{
         io.to(msgR.receiverUsername).emit("chat message",msg)
     })
 
-    socket.on("login",(msg)=>{
-        msgR = JSON.parse(msg)
-
-        User.findOne({username: msgR.Username}).then((r)=>{
-            if(r != null){
-                if(msgR.Password === r.password){
-                    Result = {
-                        'Username': r.username,
-                        'Status': 'Success',
-                    }
-                    io.to(socketid).emit("login",Result)
-                }else{
-                    Result = {
-                        'Username': r.username,
-                        'Status': 'Wrong password',
-                    }
-                    io.to(socketid).emit("login",Result)
-                }
-            }else{
-                Result = {
-                    'Username': msgR.Username,
-                    'Status': 'Username Incorrect',
-                }
-                io.to(socketid).emit("login",Result)
-            }
-        })
-
-        console.log(msgR)
-    })
+    socket.on("login",(login))
 
     socket.on("register",(msg)=>{
         msgR = JSON.parse(msg)
