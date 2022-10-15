@@ -8,7 +8,6 @@ const { isGeneratorObject } = require('util/types');
 const User = require('./Model/users');
 const Rooms = require('./Model/roomInfo');
 const Players = require('./Model/players');
-const { default: login } = require('./Controllers/login');
 
 const app = express()
 const server = http.createServer(app);
@@ -43,7 +42,35 @@ io.on("connection",(socket)=>{
         io.to(msgR.receiverUsername).emit("chat message",msg)
     })
 
-    socket.on("login",(login))
+    socket.on("login",(msg)=>{
+        msgR = JSON.parse(msg)
+
+        User.findOne({username: msgR.Username}).then((r)=>{
+            if(r != null){
+                if(msgR.Password === r.password){
+                    Result = {
+                        'Username': r.username,
+                        'Status': 'Success',
+                    }
+                    io.to(socketid).emit("login",Result)
+                }else{
+                    Result = {
+                        'Username': r.username,
+                        'Status': 'Wrong password',
+                    }
+                    io.to(socketid).emit("login",Result)
+                }
+            }else{
+                Result = {
+                    'Username': msgR.Username,
+                    'Status': 'Username Incorrect',
+                }
+                io.to(socketid).emit("login",Result)
+            }
+        })
+
+        console.log(msgR)
+    })
 
     socket.on("register",(msg)=>{
         msgR = JSON.parse(msg)
@@ -78,12 +105,14 @@ io.on("connection",(socket)=>{
         msgR = JSON.parse(msg)
 
         const result = Math.random().toString(36).substring(2,7);
+        console.log(msgR)
         Rooms.findOne({Code: result.toUpperCase()}).then(async (r)=>{
             if(r === null){
                 const room = new Rooms({
                     Code: result.toUpperCase(),
                     MaxSeeker: 2,
-                    maxHider: 5,
+                    MaxHider: 5,
+                    Boundary: msgR.Boundary
                 });
                 room.save()
 
@@ -117,8 +146,8 @@ io.on("connection",(socket)=>{
     socket.on("join room",(msg)=>{
         msgR = JSON.parse(msg)
 
-        Rooms.findOne({Code: msgR.Code}).then(async (r)=>{
-            if(r !== null){
+        Rooms.findOne({Code: msgR.Code}).then(async (roomResult)=>{
+            if(roomResult !== null){
                 Players.findOne({Code: msgR.Code,Username: msgR.Username}).then(async (r)=>{
                     if(r === null){
 
@@ -139,13 +168,13 @@ io.on("connection",(socket)=>{
 
                     
                         io.to(msgR.Code).emit("new join",Result)
-                        console.log(Result)
 
                         const playeritems = await Players.find({Code: msgR.Code})
 
                         resultPlayer = {
                             'Status':'Success',
                             'Players': playeritems,
+                            'Boundary':roomResult.Boundary,
                         }
                         io.to(socketid).emit("join room",resultPlayer)
                     

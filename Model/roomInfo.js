@@ -13,9 +13,13 @@ const roomSchema = new Schema({
         type: Number,
         required: true
     },
-    maxHider:{
+    MaxHider:{
         type: Number,
         required: true
+    },
+    Boundary:{
+        type: Object,
+        require: true
     }
     
 }, {timestamps: false})
