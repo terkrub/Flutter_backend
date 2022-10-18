@@ -8,6 +8,7 @@ const { isGeneratorObject } = require('util/types');
 const User = require('./Model/users');
 const Rooms = require('./Model/roomInfo');
 const Players = require('./Model/players');
+const { json } = require('express');
 
 const app = express()
 const server = http.createServer(app);
@@ -94,7 +95,6 @@ io.on("connection",(socket)=>{
                     'Status': 'user_exists',
                 }
                 io.to(socketid).emit("register",Result)
-                console.log(Result)
             }
         })
 
@@ -105,14 +105,17 @@ io.on("connection",(socket)=>{
         msgR = JSON.parse(msg)
 
         const result = Math.random().toString(36).substring(2,7);
-        console.log(msgR)
         Rooms.findOne({Code: result.toUpperCase()}).then(async (r)=>{
             if(r === null){
                 const room = new Rooms({
                     Code: result.toUpperCase(),
                     MaxSeeker: 2,
                     MaxHider: 5,
-                    Boundary: msgR.Boundary
+                    Boundary: msgR.Boundary,
+                    TimeLimit: msgR.TimeLimit,
+                    HideLimit: msgR.HideLimit,
+                    Start: false,
+
                 });
                 room.save()
 
@@ -158,16 +161,6 @@ io.on("connection",(socket)=>{
                         })
                     
                         player.save()
-                    
-                        Result = {
-                            'Status': 'Success',
-                            'Username': msgR.Username,
-                            'Role': msgR.Role
-                        }
-                        socket.join(msgR.Code)
-
-                    
-                        io.to(msgR.Code).emit("new join",Result)
 
                         const playeritems = await Players.find({Code: msgR.Code})
 
@@ -175,8 +168,21 @@ io.on("connection",(socket)=>{
                             'Status':'Success',
                             'Players': playeritems,
                             'Boundary':roomResult.Boundary,
+                            'TimeLimit': roomResult.TimeLimit,
+                            'HideLimit': roomResult.HideLimit
                         }
+                        socket.join(msgR.Code)
                         io.to(socketid).emit("join room",resultPlayer)
+
+                        Result = {
+                            'Status': 'Success',
+                            'Username': msgR.Username,
+                            'Role': msgR.Role
+                        }
+                        
+
+                    
+                        io.to(msgR.Code).emit("new join",Result)
                     
                     }
                     else{
@@ -206,6 +212,32 @@ io.on("connection",(socket)=>{
                 console.log(msgR)
                 r.updateOne({Role: msgR.Role})
                 io.to(msgR.Code).emit("change role",msg)
+            }
+        })
+    })
+
+    socket.on("player location",(msg)=>{
+        msgR = JSON.parse(msg)
+        console.log(msgR)
+        io.to(msgR.Code).emit("player location",msg)
+    })
+    
+    socket.on("start game",(msg)=>{
+        msgR = JSON.parse(msg)
+        Rooms.findOne({Code: msgR.Code}).then((r)=>{
+            if(r !== null){
+                r.updateOne({start: true})
+                result ={
+                    status: "Success"
+                }
+                io.to(msgR.Code).emit("start game",result)
+                console.log(msgR)
+            }
+            else{
+                result ={
+                    status: "Fail"
+                }
+                io.to(msgR.Code).emit("start game",result)
             }
         })
     })
