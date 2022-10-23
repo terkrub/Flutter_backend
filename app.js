@@ -222,6 +222,13 @@ io.on("connection",(socket)=>{
         io.to(msgR.Code).emit("player location",msg)
     })
 
+    
+    socket.on("player taunt",(msg)=>{
+        msgR = JSON.parse(msg)
+        console.log(msgR)
+        io.to(msgR.Code).emit("player taunt",msg)
+    })
+
     socket.on("eliminate",(msg)=>{
         msgR = JSON.parse(msg)
 
