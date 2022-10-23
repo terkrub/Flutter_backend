@@ -221,6 +221,24 @@ io.on("connection",(socket)=>{
         console.log(msgR)
         io.to(msgR.Code).emit("player location",msg)
     })
+
+    socket.on("eliminate",(msg)=>{
+        msgR = JSON.parse(msg)
+
+        Players.findOne({Code: msgR.Code,Username: msgR.Username}).then((r)=>{
+            if(r !== null){
+                console.log(msgR)
+                result -{
+                    status: "Success"
+                }
+                io.to(msgR.Code).emit("eliminate",msg)
+            }
+        })
+    })
+
+   
+    
+
     
     socket.on("start game",(msg)=>{
         msgR = JSON.parse(msg)
