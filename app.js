@@ -216,6 +216,18 @@ io.on("connection",(socket)=>{
         })
     })
 
+    socket.on("swap role",(msg)=>{
+        msgR = JSON.parse(msg)
+
+        Players.findOne({Code: msgR.Code,Username: msgR.Username}).then((r)=>{
+            if(r !== null){
+                console.log(msgR)
+                r.updateOne({Role: msgR.Role})
+                io.to(msgR.Code).emit("swap role",msg)
+            }
+        })
+    })
+
     socket.on("player location",(msg)=>{
         msgR = JSON.parse(msg)
         console.log(msgR)
