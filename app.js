@@ -25,12 +25,11 @@ server.listen(PORT,()=>{
 
 io.on("connection",(socket)=>{
     console.log("New user connected",socket.id)
-    socketid = socket.id
-    socket.join(socketid)
+    socket.join(socket.id)
 
     socket.on("disconnect",()=>{
         console.log("User disconnect")
-        socket.leave(socketid)
+        socket.leave(socket.id)
     })
 
     socket.on("chat message",(msg)=>{
@@ -53,20 +52,20 @@ io.on("connection",(socket)=>{
                         'Username': r.username,
                         'Status': 'Success',
                     }
-                    io.to(socketid).emit("login",Result)
+                    io.to(socket.id).emit("login",Result)
                 }else{
                     Result = {
                         'Username': r.username,
                         'Status': 'Wrong password',
                     }
-                    io.to(socketid).emit("login",Result)
+                    io.to(socket.id).emit("login",Result)
                 }
             }else{
                 Result = {
                     'Username': msgR.Username,
                     'Status': 'Username Incorrect',
                 }
-                io.to(socketid).emit("login",Result)
+                io.to(socket.id).emit("login",Result)
             }
         })
 
@@ -87,14 +86,14 @@ io.on("connection",(socket)=>{
                     'Username': msgR.Username,
                     'Status': 'Success',
                 }
-                io.to(socketid).emit("register",Result)
+                io.to(socket.id).emit("register",Result)
                 console.log(Result)
             }else{
                 Result = {
                     'Username': msgR.Username,
                     'Status': 'user_exists',
                 }
-                io.to(socketid).emit("register",Result)
+                io.to(socket.id).emit("register",Result)
             }
         })
 
@@ -140,7 +139,7 @@ io.on("connection",(socket)=>{
                 Result = {
                     'Status': 'Fail',
                 }
-                io.to(socketid).emit("create room",Result)
+                io.to(socket.id).emit("create room",Result)
             }
         })
 
@@ -172,7 +171,7 @@ io.on("connection",(socket)=>{
                             'HideLimit': roomResult.HideLimit
                         }
                         socket.join(msgR.Code)
-                        io.to(socketid).emit("join room",resultPlayer)
+                        io.to(socket.id).emit("join room",resultPlayer)
 
                         Result = {
                             'Status': 'Success',
@@ -189,7 +188,7 @@ io.on("connection",(socket)=>{
                         Result = {
                             'Status': 'Fail',
                         }
-                        io.to(socketid).emit("join room",Result)
+                        io.to(socket.id).emit("join room",Result)
                     }
                 })
                 
@@ -199,7 +198,7 @@ io.on("connection",(socket)=>{
                 Result = {
                     'Status': 'Fail',
                 }
-                io.to(socketid).emit("new join",Result)
+                io.to(socket.id).emit("new join",Result)
             }
         })
 
@@ -247,17 +246,13 @@ io.on("connection",(socket)=>{
         Players.findOne({Code: msgR.Code,Username: msgR.Username}).then((r)=>{
             if(r !== null){
                 console.log(msgR)
-                result -{
+                result ={
                     status: "Success"
                 }
                 io.to(msgR.Code).emit("eliminate",msg)
             }
         })
     })
-
-   
-    
-
     
     socket.on("start game",(msg)=>{
         msgR = JSON.parse(msg)
