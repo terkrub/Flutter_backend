@@ -9,11 +9,14 @@ const User = require('./Model/users');
 const Rooms = require('./Model/roomInfo');
 const Players = require('./Model/players');
 const { json } = require('express');
-
 const app = express()
 const server = http.createServer(app);
 const io = scoketIO(server)
 const PORT = process.env.PORT || 5000;
+const bcrypt = require('bcryptjs')
+const secret = 'username-login'
+const saltBounds = 10;
+
 app.use(express.json())
 app.use(cors)
 
@@ -47,19 +50,22 @@ io.on("connection",(socket)=>{
 
         User.findOne({username: msgR.Username}).then((r)=>{
             if(r != null){
-                if(msgR.Password === r.password){
-                    Result = {
-                        'Username': r.username,
-                        'Status': 'Success',
+                bcrypt.compare(msgR.Password,r.password,function (err,isLogin){
+                    if(isLogin){
+                        Result = {
+                            'Username': r.username,
+                            'Status': 'Success',
+                        }
+                        io.to(socket.id).emit("login",Result)
+                    }else{
+                        Result = {
+                            'Username': r.username,
+                            'Status': 'Wrong password',
+                        }
+                        io.to(socket.id).emit("login",Result)
                     }
-                    io.to(socket.id).emit("login",Result)
-                }else{
-                    Result = {
-                        'Username': r.username,
-                        'Status': 'Wrong password',
-                    }
-                    io.to(socket.id).emit("login",Result)
-                }
+                })
+                
             }else{
                 Result = {
                     'Username': msgR.Username,
@@ -77,17 +83,20 @@ io.on("connection",(socket)=>{
 
         User.findOne({username: msgR.Username}).then((r)=>{
             if(r === null){
-                const user = new User({
-                    username: msgR.Username,
-                    password: msgR.Password,
-                });
-                user.save()
-                Result = {
-                    'Username': msgR.Username,
-                    'Status': 'Success',
-                }
-                io.to(socket.id).emit("register",Result)
-                console.log(Result)
+                bcrypt.hash(msgR.Password, saltBounds,function (err, hashPw){
+                    const user = new User({
+                        username: msgR.Username,
+                        password: hashPw,
+                    });
+                    user.save()
+                    Result = {
+                        'Username': msgR.Username,
+                        'Status': 'Success',
+                    }
+                    io.to(socket.id).emit("register",Result)
+                    console.log(Result)
+                })
+                
             }else{
                 Result = {
                     'Username': msgR.Username,
@@ -97,7 +106,6 @@ io.on("connection",(socket)=>{
             }
         })
 
-        console.log(msgR)
     })
     
     socket.on("create room",(msg)=>{
